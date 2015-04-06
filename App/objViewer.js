@@ -43,6 +43,8 @@ var zAxis = 2;
 var axis = 1;
 var theta =[0, 0, 0];
 
+var centroid = [ 0, 0, 0];
+
 var thetaLoc;
 
 // camera definitions
@@ -64,8 +66,13 @@ var zfar = 100.0;
 
 var flag = true;
 
-// first
-var first = true;
+// first round
+var first = true
+
+// shading type
+var flatShading = 0;
+var smoothShading = 1;
+var shading = 1;
 
 // generate a quadrilateral with triangles
 function quad(a, b, c, d) {
@@ -139,38 +146,26 @@ window.onload = function init() {
     document.getElementById("ButtonZ").onclick = function(){axis = zAxis;};
     document.getElementById("ButtonT").onclick = function(){flag = !flag;};
 
+    document.getElementById("ButtonF").onclick = function(){shading = flatShading;};
+    document.getElementById("ButtonS").onclick = function(){shading = smoothShading;};
+
     document.getElementById('files').onchange = function (evt) {
 
         // TO DO: load OBJ file and display
         var files = evt.target.files; // FileList object
 
-        console.log("Event 'onchange' before ");
-
-        // files is a FileList of File objects. List some properties.
         for (var i = 0, f; f = files[i]; i++) {
 
             console.log(escape(f.name));
             var reader = new FileReader();
 
             reader.onload = function(e) {
-                var result = loadObject(e.target.result);
-
-                pointsArray = result[0];
-                normalsArray = result[1];
-
-                console.log("points length: " + pointsArray.length);
-                console.log("normals length: " + normalsArray.length);
-
+                loadObject(e.target.result);
                 createBuffers();
             };
 
             reader.readAsBinaryString(f);
         }
-        
-        console.log("Event 'onchange' after");
-
-        // FileReader.readAsBinaryString()
-        // loadObject(files);
     };
     
     gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
@@ -200,6 +195,7 @@ var render = function() {
 
     modelViewMatrix = lookAt(eye, at, up);
               
+    modelViewMatrix = mult(modelViewMatrix, translate(negate(centroid)));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[xAxis], [1, 0, 0] ));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[yAxis], [0, 1, 0] ));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[zAxis], [0, 0, 1] ));
@@ -216,7 +212,6 @@ var render = function() {
 
 function createBuffers(points, normals) {
 
-    console.log("First flatten");
     var nBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW );
@@ -225,7 +220,6 @@ function createBuffers(points, normals) {
     gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vNormal );
 
-    console.log("Second flatten");
     var vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
@@ -238,25 +232,9 @@ function createBuffers(points, normals) {
 function loadObject(data) {
 
     // TO DO: convert strings into array of vertex and normal vectors
-    var result = loadObjFile(data);
+    var result = loadObjFile(data, shading);
     
-    var centroid     = result[0];
-    var pointsArray  = result[1];
-    var normalsArray = result[2];
-    
-    console.log("Centroid: ");
-    console.log(centroid);
-
-    // TO DO: apply transformation to the object so that he is centered at the origin
-    var toOrigin = translate(-centroid[0], -centroid[1], -centroid[2]);
-    for (var i = 0, point; point = pointsArray[i]; i++) {
-        pointsArray[i] = vec4(
-            dot(toOrigin[0], point),
-            dot(toOrigin[1], point),
-            dot(toOrigin[2], point),
-            dot(toOrigin[3], point)
-        );
-    }
-
-    return [ pointsArray, normalsArray ];
+    centroid     = result[0];
+    pointsArray  = result[1];
+    normalsArray = result[2];
 }

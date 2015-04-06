@@ -1,4 +1,4 @@
-function loadObjFile(data) {
+function loadObjFile(data, shading) {
 
 	// TO DO:   (i) Parse OBJ file and extract vertices and normal vectors
 
@@ -75,10 +75,8 @@ function loadObjFile(data) {
         normalsArray.push(normals[parseInt(face[2][2])-1]);
     }
 
-    var centroid = vec4( (maxX+minX)/2, (maxY+minY)/2, (maxZ+minZ)/2, 1.0 );
+    var centroid = vec3( (maxX+minX)/2, (maxY+minY)/2, (maxZ+minZ)/2 );
     
-    console.log(normals[0]);
-
     console.log("nº vertices: " + v_count);
     console.log("nº normals: "  + vn_count);
     console.log("nº faces: "    + f_count);
