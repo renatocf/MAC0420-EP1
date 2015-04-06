@@ -4,9 +4,10 @@ function loadObjFile(data) {
 
     var lines = data.split("\n");
 
-    var sumX = 0;
-    var sumY = 0;
-    var sumZ = 0;
+    var minX = Infinity, maxX = -Infinity;
+    var minY = Infinity, maxY = -Infinity;
+    var minZ = Infinity, maxZ = -Infinity;
+
     var v_count = 0;
     var vertices = [];
 
@@ -25,14 +26,21 @@ function loadObjFile(data) {
         switch (elements.shift()) {
 
             case "v":
-                var v0 = parseFloat(elements[0]);
-                var v1 = parseFloat(elements[1]);
-                var v2 = parseFloat(elements[2]);
-                var v3 = elements.length == 3 ? 1.0 : parseFloat(elements[3]);
+                var x = parseFloat(elements[0]);
+                var y = parseFloat(elements[1]);
+                var z = parseFloat(elements[2]);
+                var w = elements.length == 3 ? 1.0 : parseFloat(elements[3]);
                 
-                vertices.push(vec4(v0, v1, v2, v3));
+                vertices.push(vec4(x, y, z, w));
 
-                sumX += v0; sumY += v1; sumZ += v2;
+                if(x < minX) minX = x;
+                if(y < minY) minY = y;
+                if(z < minZ) minZ = z;
+
+                if(x > maxX) maxX = x;
+                if(y > maxY) maxY = y;
+                if(z > maxZ) maxZ = z;
+
                 v_count++;
                 break;
 
@@ -67,7 +75,7 @@ function loadObjFile(data) {
         normalsArray.push(normals[parseInt(face[2][2])-1]);
     }
 
-    var centroid = vec4(sumX/v_count, sumY/v_count, sumZ/v_count, 1.0);
+    var centroid = vec4( (maxX+minX)/2, (maxY+minY)/2, (maxZ+minZ)/2, 1.0 );
     
     console.log(normals[0]);
 

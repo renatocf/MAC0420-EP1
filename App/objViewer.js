@@ -233,7 +233,6 @@ function createBuffers(points, normals) {
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
-
 }
 
 function loadObject(data) {
@@ -245,15 +244,19 @@ function loadObject(data) {
     var pointsArray  = result[1];
     var normalsArray = result[2];
     
-    console.log("Centroid: " + centroid);
+    console.log("Centroid: ");
+    console.log(centroid);
 
     // TO DO: apply transformation to the object so that he is centered at the origin
-    var to_origin = translate(-centroid[0], -centroid[1], -centroid[2]);
-    
-    // for (var i = 0, point; point = pointsArray[i]; i++) {
-    //     console.log(pointsArray[i]);
-    //     pointsArray[i] = mult(to_origin, point);
-    // }
+    var toOrigin = translate(-centroid[0], -centroid[1], -centroid[2]);
+    for (var i = 0, point; point = pointsArray[i]; i++) {
+        pointsArray[i] = vec4(
+            dot(toOrigin[0], point),
+            dot(toOrigin[1], point),
+            dot(toOrigin[2], point),
+            dot(toOrigin[3], point)
+        );
+    }
 
     return [ pointsArray, normalsArray ];
 }
