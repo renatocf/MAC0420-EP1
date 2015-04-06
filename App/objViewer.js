@@ -241,10 +241,19 @@ function loadObject(data) {
     // TO DO: convert strings into array of vertex and normal vectors
     var result = loadObjFile(data);
     
-    var pointsArray = result[0];
-    var normalsArray = result[1];
+    var centroid     = result[0];
+    var pointsArray  = result[1];
+    var normalsArray = result[2];
+    
+    console.log("Centroid: " + centroid);
 
     // TO DO: apply transformation to the object so that he is centered at the origin
-       
+    var to_origin = translate(-centroid[0], -centroid[1], -centroid[2]);
+    
+    // for (var i = 0, point; point = pointsArray[i]; i++) {
+    //     console.log(pointsArray[i]);
+    //     pointsArray[i] = mult(to_origin, point);
+    // }
+
     return [ pointsArray, normalsArray ];
 }
