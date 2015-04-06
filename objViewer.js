@@ -64,6 +64,9 @@ var zfar = 100.0;
 
 var flag = true;
 
+// first
+var first = true;
+
 // generate a quadrilateral with triangles
 function quad(a, b, c, d) {
 
@@ -115,7 +118,7 @@ window.onload = function init() {
     gl.useProgram( program );
     
     // draw simple cube for starters
-    colorCube();
+    if(first) { colorCube(); first = !first; }
 
     // create vertex and normal buffers
     createBuffers();
@@ -138,29 +141,38 @@ window.onload = function init() {
 
     document.getElementById('files').onchange = function (evt) {
 
+        // TO DO: load OBJ file and display
         var files = evt.target.files; // FileList object
+
+        console.log("Event 'onchange' before ");
 
         // files is a FileList of File objects. List some properties.
         for (var i = 0, f; f = files[i]; i++) {
 
             console.log(escape(f.name));
             var reader = new FileReader();
-            
-            reader.onload = (function(theFile) {
-                return function(e) {
-                    // Render thumbnail.
-                    console.log(e.target.result.split("\n"));
-                };
-            })(f);
-            
+
+            reader.onload = function(e) {
+                var result = loadObject(e.target.result);
+
+                pointsArray = result[0];
+                normalsArray = result[1];
+
+                console.log("points length: " + pointsArray.length);
+                console.log("normals length: " + normalsArray.length);
+
+                createBuffers();
+            };
+
             reader.readAsBinaryString(f);
         }
+        
+        console.log("Event 'onchange' after");
 
         // FileReader.readAsBinaryString()
         // loadObject(files);
-        // TO DO: load OBJ file and display
     };
-
+    
     gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
        flatten(ambientProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
@@ -197,13 +209,14 @@ var render = function() {
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
 
-    gl.drawArrays( gl.TRIANGLES, 0, numVertices );
-            
+    gl.drawArrays( gl.TRIANGLES, 0, pointsArray.length );
+
     requestAnimFrame(render);
 }
 
 function createBuffers(points, normals) {
 
+    console.log("First flatten");
     var nBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW );
@@ -212,6 +225,7 @@ function createBuffers(points, normals) {
     gl.vertexAttribPointer( vNormal, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vNormal );
 
+    console.log("Second flatten");
     var vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW );
@@ -226,7 +240,11 @@ function loadObject(data) {
 
     // TO DO: convert strings into array of vertex and normal vectors
     var result = loadObjFile(data);
+    
+    var pointsArray = result[0];
+    var normalsArray = result[1];
 
     // TO DO: apply transformation to the object so that he is centered at the origin
-
+       
+    return [ pointsArray, normalsArray ];
 }
