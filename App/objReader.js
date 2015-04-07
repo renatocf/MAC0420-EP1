@@ -18,7 +18,7 @@ function loadObjFile(data, shading) {
     var faces = [];
     
     var pointsArray = [];
-    var normalsArray = [];
+    var smoothNormals = [];
 
     for (var i = 0, line; line = lines[i]; i++) {
         
@@ -70,9 +70,9 @@ function loadObjFile(data, shading) {
         pointsArray.push(vertices[parseInt(face[1][0])-1]);
         pointsArray.push(vertices[parseInt(face[2][0])-1]);
 
-        normalsArray.push(normals[parseInt(face[0][2])-1]);
-        normalsArray.push(normals[parseInt(face[1][2])-1]);
-        normalsArray.push(normals[parseInt(face[2][2])-1]);
+        smoothNormals.push(normals[parseInt(face[0][2])-1]);
+        smoothNormals.push(normals[parseInt(face[1][2])-1]);
+        smoothNormals.push(normals[parseInt(face[2][2])-1]);
     }
 
     var centroid = vec3( (maxX+minX)/2, (maxY+minY)/2, (maxZ+minZ)/2 );
@@ -85,5 +85,5 @@ function loadObjFile(data, shading) {
 
 
 	// TO DO: (iii) Return vertices and normals and any associated information you might find useful
-    return [ centroid, pointsArray, normalsArray ];
+    return [ centroid, pointsArray, smoothNormals ];
 }
