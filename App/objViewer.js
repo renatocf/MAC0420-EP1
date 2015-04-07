@@ -195,10 +195,10 @@ var render = function() {
 
     modelViewMatrix = lookAt(eye, at, up);
               
-    modelViewMatrix = mult(modelViewMatrix, translate(negate(centroid)));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[xAxis], [1, 0, 0] ));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[yAxis], [0, 1, 0] ));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[zAxis], [0, 0, 1] ));
+    modelViewMatrix = mult(modelViewMatrix, translate(negate(centroid)));
     
     projectionMatrix = ortho(xleft, xright, ybottom, ytop, znear, zfar);
 
