@@ -74,6 +74,8 @@ var flatShading = 0;
 var smoothShading = 1;
 var shading = 1;
 
+var smoothNormals = 0;
+
 // generate a quadrilateral with triangles
 function quad(a, b, c, d) {
 
@@ -234,7 +236,9 @@ function loadObject(data) {
     // TO DO: convert strings into array of vertex and normal vectors
     var result = loadObjFile(data, shading);
     
-    centroid     = result[0];
-    pointsArray  = result[1];
-    normalsArray = result[2];
+    centroid      = result[0];
+    pointsArray   = result[1];
+    smoothNormals = result[2];
+
+    normalsArray = smoothNormals;
 }
