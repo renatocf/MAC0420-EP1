@@ -72,10 +72,12 @@ var flag = true;
 var first = true
 
 // shading type
-var flatShading = 0;
-var smoothShading = 1;
+var fileShading = 0;
+var flatShading = 1;
+var smoothShading = 2;
 var shading = flatShading;
 
+var fileNormals = [];
 var flatNormals = [];
 var smoothNormals = [];
 
@@ -121,10 +123,13 @@ window.onload = function init() {
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    
     // create viewport and clear color
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 0.5, 0.5, 0.5, 1.0 );
-    
+
     // enable depth testing for hidden surface removal
     gl.enable(gl.DEPTH_TEST);
 
@@ -153,8 +158,10 @@ window.onload = function init() {
     document.getElementById("ButtonY").onclick = function(){axis = yAxis;};
     document.getElementById("ButtonZ").onclick = function(){axis = zAxis;};
     document.getElementById("ButtonT").onclick = function(){flag = !flag;};
+
     document.getElementById("ButtonF").onclick = function(){shading = flatShading; createBuffers()};
     document.getElementById("ButtonS").onclick = function(){shading = smoothShading; createBuffers()};
+    document.getElementById("ButtonN").onclick = function(){shading = fileShading; createBuffers()};
 
     document.getElementById('files').onchange = function (evt) {
 
@@ -191,6 +198,9 @@ window.onload = function init() {
 }
 
 var render = function() {
+
+    var wrapper = document.getElementById( "gl-wrapper" );
+    var ratio = wrapper.clientHeight/wrapper.clientWidth;
             
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             
@@ -202,6 +212,7 @@ var render = function() {
 
     modelViewMatrix = lookAt(eye, at, up);
               
+    modelViewMatrix = mult(modelViewMatrix, scaleM(vec3(ratio, 1, 1)));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[xAxis], [1, 0, 0] ));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[yAxis], [0, 1, 0] ));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[zAxis], [0, 0, 1] ));
@@ -221,6 +232,10 @@ var render = function() {
 function createBuffers(points, normals) {
 
     switch (shading) {
+      case fileShading:
+        normalsArray = fileNormals;
+        console.log("File shading (" + fileNormals.length + ")");
+        break;
       case flatShading:
         normalsArray = flatNormals;
         console.log("Flat shading (" + flatNormals.length + ")");
@@ -255,9 +270,10 @@ function loadObject(data) {
     
     centroid      = result[0];
     pointsArray   = result[1];
-    flatNormals   = result[2];
-    smoothNormals = result[3];
-    dimension     = result[4];
+    fileNormals   = result[2];
+    flatNormals   = result[3];
+    smoothNormals = result[4];
+    dimension     = result[5];
 
     dmax = Math.sqrt(
         Math.pow(dimension.maxX-dimension.minX, 2)
