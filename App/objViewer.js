@@ -43,7 +43,9 @@ var zAxis = 2;
 var axis = 1;
 var theta =[0, 0, 0];
 
-var centroid = [ 0, 0, 0];
+var centroid = [ 0, 0, 0 ];
+var dimension = {};
+var dmax = 2;
 
 var thetaLoc;
 
@@ -72,9 +74,10 @@ var first = true
 // shading type
 var flatShading = 0;
 var smoothShading = 1;
-var shading = 1;
+var shading = flatShading;
 
-var smoothNormals = 0;
+var flatNormals = [];
+var smoothNormals = [];
 
 // generate a quadrilateral with triangles
 function quad(a, b, c, d) {
@@ -95,6 +98,9 @@ function quad(a, b, c, d) {
      normalsArray.push(normal); 
      pointsArray.push(vertices[d]); 
      normalsArray.push(normal);    
+
+     flatNormals = normalsArray;
+     smoothNormals = normalsArray;
 }
 
 // define faces of a cube
@@ -111,7 +117,7 @@ function colorCube()
 window.onload = function init() {
 
     canvas = document.getElementById( "gl-canvas" );
-    
+
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
@@ -127,7 +133,7 @@ window.onload = function init() {
     gl.useProgram( program );
     
     // draw simple cube for starters
-    if(first) { colorCube(); first = !first; }
+    if (first) { colorCube(); first = !first; }
 
     // create vertex and normal buffers
     createBuffers();
@@ -147,9 +153,8 @@ window.onload = function init() {
     document.getElementById("ButtonY").onclick = function(){axis = yAxis;};
     document.getElementById("ButtonZ").onclick = function(){axis = zAxis;};
     document.getElementById("ButtonT").onclick = function(){flag = !flag;};
-
-    document.getElementById("ButtonF").onclick = function(){shading = flatShading;};
-    document.getElementById("ButtonS").onclick = function(){shading = smoothShading;};
+    document.getElementById("ButtonF").onclick = function(){shading = flatShading; createBuffers()};
+    document.getElementById("ButtonS").onclick = function(){shading = smoothShading; createBuffers()};
 
     document.getElementById('files').onchange = function (evt) {
 
@@ -166,7 +171,7 @@ window.onload = function init() {
                 createBuffers();
             };
 
-            reader.readAsBinaryString(f);
+            reader.readAsText(f);
         }
     };
     
@@ -200,6 +205,7 @@ var render = function() {
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[xAxis], [1, 0, 0] ));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[yAxis], [0, 1, 0] ));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[zAxis], [0, 0, 1] ));
+    modelViewMatrix = mult(modelViewMatrix, scaleM(vec3(2/dmax, 2/dmax, 2/dmax)));
     modelViewMatrix = mult(modelViewMatrix, translate(negate(centroid)));
     
     projectionMatrix = ortho(xleft, xright, ybottom, ytop, znear, zfar);
@@ -213,6 +219,17 @@ var render = function() {
 }
 
 function createBuffers(points, normals) {
+
+    switch (shading) {
+      case flatShading:
+        normalsArray = flatNormals;
+        console.log("Flat shading (" + flatNormals.length + ")");
+        break;
+      case smoothShading:
+        normalsArray = smoothNormals;
+        console.log("Smooth shading (" + smoothNormals.length + ")");
+        break;
+    }
 
     var nBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
@@ -238,7 +255,16 @@ function loadObject(data) {
     
     centroid      = result[0];
     pointsArray   = result[1];
-    smoothNormals = result[2];
+    flatNormals   = result[2];
+    smoothNormals = result[3];
+    dimension     = result[4];
+
+    dmax = Math.sqrt(
+        Math.pow(dimension.maxX-dimension.minX, 2)
+        + Math.pow(dimension.maxY-dimension.minY, 2)
+        + Math.pow(dimension.maxZ-dimension.minZ, 2)
+    );
+    console.log("dmax: " + dmax);
 
     normalsArray = smoothNormals;
 }

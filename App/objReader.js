@@ -4,9 +4,11 @@ function loadObjFile(data, shading) {
 
     var lines = data.split("\n");
 
-    var minX = Infinity, maxX = -Infinity;
-    var minY = Infinity, maxY = -Infinity;
-    var minZ = Infinity, maxZ = -Infinity;
+    var dimension = {
+        minX: Infinity, maxX: -Infinity,
+        minY: Infinity, maxY: -Infinity,
+        minZ: Infinity, maxZ: -Infinity
+    }
 
     var v_count = 0;
     var vertices = [];
@@ -18,11 +20,12 @@ function loadObjFile(data, shading) {
     var faces = [];
     
     var pointsArray = [];
+    var flatNormals = [];
     var smoothNormals = [];
 
-    for (var i = 0, line; line = lines[i]; i++) {
+    for (var i = 0; i < lines.length; i++) {
         
-        var elements = line.split(/\s+/);
+        var elements = lines[i].split(/\s+/);
         switch (elements.shift()) {
 
             case "v":
@@ -33,13 +36,13 @@ function loadObjFile(data, shading) {
                 
                 vertices.push(vec4(x, y, z, w));
 
-                if(x < minX) minX = x;
-                if(y < minY) minY = y;
-                if(z < minZ) minZ = z;
+                if(x < dimension.minX) dimension.minX = x;
+                if(y < dimension.minY) dimension.minY = y;
+                if(z < dimension.minZ) dimension.minZ = z;
 
-                if(x > maxX) maxX = x;
-                if(y > maxY) maxY = y;
-                if(z > maxZ) maxZ = z;
+                if(x > dimension.maxX) dimension.maxX = x;
+                if(y > dimension.maxY) dimension.maxY = y;
+                if(z > dimension.maxZ) dimension.maxZ = z;
 
                 v_count++;
                 break;
@@ -70,12 +73,16 @@ function loadObjFile(data, shading) {
         pointsArray.push(vertices[parseInt(face[1][0])-1]);
         pointsArray.push(vertices[parseInt(face[2][0])-1]);
 
-        smoothNormals.push(normals[parseInt(face[0][2])-1]);
-        smoothNormals.push(normals[parseInt(face[1][2])-1]);
-        smoothNormals.push(normals[parseInt(face[2][2])-1]);
+        if (face[0][2]) smoothNormals.push(normals[parseInt(face[0][2])-1]);
+        if (face[1][2]) smoothNormals.push(normals[parseInt(face[1][2])-1]);
+        if (face[2][2]) smoothNormals.push(normals[parseInt(face[2][2])-1]);
     }
 
-    var centroid = vec3( (maxX+minX)/2, (maxY+minY)/2, (maxZ+minZ)/2 );
+    var centroid = vec3(
+        (dimension.maxX+dimension.minX)/2,
+        (dimension.maxY+dimension.minY)/2,
+        (dimension.maxZ+dimension.minZ)/2
+    );
     
     console.log("nº vertices: " + v_count);
     console.log("nº normals: "  + vn_count);
@@ -83,7 +90,60 @@ function loadObjFile(data, shading) {
 
 	// TO DO:  (ii) If normal vectors are not in the file, you will need to calculate them
 
+    // Normals for flat shading
+    for (var i = 0, face; face = faces[i]; i++) {
+        var a = parseInt(face[0][0])-1;
+        var b = parseInt(face[1][0])-1;
+        var c = parseInt(face[2][0])-1;
+
+        var t1 = subtract(vertices[b], vertices[a]);
+        var t2 = subtract(vertices[c], vertices[b]);
+        var normal = vec4(cross(t1, t2), 0);
+
+        for (var j = 0; j < 3; j++)
+            flatNormals.push(normal);
+    }
+
+    // Normals for smooth shading, if they don't exist
+    if (smoothNormals.length == 0) {
+
+        for (var i = 0; i < vertices.length; i++) {
+            vertices[i].count = 0;
+            vertices[i].smoothNormal = vec4(0, 0, 0, 0);
+        }
+
+        for (var i = 0, face; face = faces[i]; i++) {
+            var a = parseInt(face[0][0])-1;
+            var b = parseInt(face[1][0])-1;
+            var c = parseInt(face[2][0])-1;
+
+            var t1 = subtract(vertices[b], vertices[a]);
+            var t2 = subtract(vertices[c], vertices[b]);
+            var normal = vec4(cross(t1, t2), 0);
+
+            vertices[a].count += 1;
+            vertices[a].smoothNormal = add(vertices[a].smoothNormal, normal);
+
+            vertices[b].count += 1;
+            vertices[b].smoothNormal = add(vertices[b].smoothNormal, normal);
+
+            vertices[c].count += 1;
+            vertices[c].smoothNormal = add(vertices[c].smoothNormal, normal);
+        }
+
+        for (var vertice in vertices) {
+            for (var pos in vertice.smoothNormal)
+                pos /= vertice.count;
+            vertice.smoothNormal = vertice.smoothNormal;
+        }
+
+        for (var i = 0, face; face = faces[i], i < faces.length; i++) {
+            smoothNormals.push(normalize(vertices[parseInt(face[0][0])-1].smoothNormal));
+            smoothNormals.push(normalize(vertices[parseInt(face[1][0])-1].smoothNormal));
+            smoothNormals.push(normalize(vertices[parseInt(face[2][0])-1].smoothNormal));
+        }
+    }
 
 	// TO DO: (iii) Return vertices and normals and any associated information you might find useful
-    return [ centroid, pointsArray, smoothNormals ];
+    return [ centroid, pointsArray, flatNormals, smoothNormals, dimension ];
 }

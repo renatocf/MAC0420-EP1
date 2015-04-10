@@ -3,6 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <title>Simple OBJ Viewer</title>
+
+    <link rel="stylesheet" type="text/css" href="objViewer.css">
 </head>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -74,19 +76,20 @@ void main()
 <script type="text/javascript" src="objViewer.js"></script>
 <script type="text/javascript" src="objReader.js"></script>
 
+<body>
+<div id="gl-wrapper">
 <input type="file" id="files" name="files[]" accept=".obj,"></input>
 
-<body>
-<p>
 <canvas id="gl-canvas" width="512" height="512">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
-</p>
+
 <button id = "ButtonX">Rotate X</button>
 <button id = "ButtonY">Rotate Y</button>
 <button id = "ButtonZ">Rotate Z</button>
 <button id = "ButtonT">Toggle Rotation</button>
 <button id = "ButtonF">Flat Shading</button>
 <button id = "ButtonS">Smooth Shading</button>
+</div>
 </body>
 </html>
