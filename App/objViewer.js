@@ -170,7 +170,6 @@ window.onload = function init() {
 
         for (var i = 0, f; f = files[i]; i++) {
 
-            console.log(escape(f.name));
             var reader = new FileReader();
 
             reader.onload = function(e) {
@@ -234,15 +233,12 @@ function createBuffers(points, normals) {
     switch (shading) {
       case fileShading:
         normalsArray = fileNormals;
-        console.log("File shading (" + fileNormals.length + ")");
         break;
       case flatShading:
         normalsArray = flatNormals;
-        console.log("Flat shading (" + flatNormals.length + ")");
         break;
       case smoothShading:
         normalsArray = smoothNormals;
-        console.log("Smooth shading (" + smoothNormals.length + ")");
         break;
     }
 
@@ -280,7 +276,6 @@ function loadObject(data) {
         + Math.pow(dimension.maxY-dimension.minY, 2)
         + Math.pow(dimension.maxZ-dimension.minZ, 2)
     );
-    console.log("dmax: " + dmax);
 
     normalsArray = smoothNormals;
 }

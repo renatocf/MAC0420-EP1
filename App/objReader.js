@@ -85,10 +85,6 @@ function loadObjFile(data, shading) {
         (dimension.maxZ+dimension.minZ)/2
     );
     
-    console.log("nº vertices: " + v_count);
-    console.log("nº normals: "  + vn_count);
-    console.log("nº faces: "    + f_count);
-
 	// TO DO:  (ii) If normal vectors are not in the file, you will need to calculate them
 
     // Normals for flat shading
