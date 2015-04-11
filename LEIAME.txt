@@ -1,0 +1,30 @@
+
+1º Exercício-Programa de MAC0420 - Computação Gráfica
+======================================================
+
+* Renato Cordeiro Ferreira - 7990933
+
+* Diretórios
+
+    Este programa contém 3 diretórios: 
+    - App, com os arquivos .html, .js e .css fornecidos com o esqueleto;
+    - Common, com utilitários JavaScript para comunicação com o WebGL.
+    - Objs, com exemplos de arquivos .obj;
+
+* Instruções para uso do software
+
+    Para utilizar o programa, basta abrir o arquivo App/objViewer.html
+    em um browser com suporte para WebGL.
+
+    Por padrão, o programa exibirá um cubo simples. Arquivos com
+    extensão .obj podem ser carregados para exibição.
+
+    Existem 3 opções de coloração:
+    - Flat shading: coloração definida pelas normais dos triângulos que
+      formam cada face;
+    - Smooth shading: normais dos vértices calculadas com a média das
+      normais das faces;
+    - File normals: coloração definida pelas normais do arquivo .obj.
+
+    Por padrão, se não houver normais no arquivo .obj, será exibido o
+    programa exibirá o smooth shading.
