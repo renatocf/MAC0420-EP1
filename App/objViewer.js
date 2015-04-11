@@ -1,5 +1,3 @@
-
-
 var program;
 var canvas;
 var gl;
@@ -75,7 +73,9 @@ var first = true
 var fileShading = 0;
 var flatShading = 1;
 var smoothShading = 2;
+
 var shading = flatShading;
+var old_shading = shading;
 
 var fileNormals = [];
 var flatNormals = [];
@@ -159,9 +159,9 @@ window.onload = function init() {
     document.getElementById("ButtonZ").onclick = function(){axis = zAxis;};
     document.getElementById("ButtonT").onclick = function(){flag = !flag;};
 
-    document.getElementById("ButtonF").onclick = function(){shading = flatShading; createBuffers()};
-    document.getElementById("ButtonS").onclick = function(){shading = smoothShading; createBuffers()};
-    document.getElementById("ButtonN").onclick = function(){shading = fileShading; createBuffers()};
+    document.getElementById("ButtonF").onclick = function(){shading = flatShading;};
+    document.getElementById("ButtonS").onclick = function(){shading = smoothShading;};
+    document.getElementById("ButtonN").onclick = function(){shading = fileShading;};
 
     document.getElementById('files').onchange = function (evt) {
 
@@ -198,6 +198,17 @@ window.onload = function init() {
 
 var render = function() {
 
+    if (shading != old_shading) {
+        switch (shading) {
+          case fileShading:   normalsArray = fileNormals;   break;
+          case flatShading:   normalsArray = flatNormals;   break;
+          case smoothShading: normalsArray = smoothNormals; break;
+        }
+        createBuffers()
+        old_shading = shading;
+        console.log("Changind to " + shading);
+    }
+
     var wrapper = document.getElementById( "gl-wrapper" );
     var ratio = wrapper.clientHeight/wrapper.clientWidth;
             
@@ -230,18 +241,6 @@ var render = function() {
 
 function createBuffers(points, normals) {
 
-    switch (shading) {
-      case fileShading:
-        normalsArray = fileNormals;
-        break;
-      case flatShading:
-        normalsArray = flatNormals;
-        break;
-      case smoothShading:
-        normalsArray = smoothNormals;
-        break;
-    }
-
     var nBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW );
@@ -270,6 +269,8 @@ function loadObject(data) {
     flatNormals   = result[3];
     smoothNormals = result[4];
     dimension     = result[5];
+    
+    if (fileNormals.length == 0) fileNormals = smoothNormals;
 
     dmax = Math.sqrt(
         Math.pow(dimension.maxX-dimension.minX, 2)

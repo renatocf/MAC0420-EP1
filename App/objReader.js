@@ -74,9 +74,9 @@ function loadObjFile(data, shading) {
         pointsArray.push(vertices[parseInt(face[1][0])-1]);
         pointsArray.push(vertices[parseInt(face[2][0])-1]);
 
-        fileNormals.push(normals[parseInt(face[0][2])-1]);
-        fileNormals.push(normals[parseInt(face[1][2])-1]);
-        fileNormals.push(normals[parseInt(face[2][2])-1]);
+        if (parseInt(face[0][2])) fileNormals.push(normals[parseInt(face[0][2])-1]);
+        if (parseInt(face[1][2])) fileNormals.push(normals[parseInt(face[1][2])-1]);
+        if (parseInt(face[2][2])) fileNormals.push(normals[parseInt(face[2][2])-1]);
     }
 
     var centroid = vec3(
